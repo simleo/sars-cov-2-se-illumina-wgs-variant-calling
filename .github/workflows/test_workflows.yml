@@ -36,6 +36,11 @@ on:
         default: ''
         required: false
         type: string
+      check-outputs:
+        description: 'if true, check if any workflow test failed'
+        default: false
+        required: false
+        type: boolean
 jobs:
   test:
     name: Test workflows
@@ -83,3 +88,9 @@ jobs:
       with:
         name: 'Workflow test output ${{ matrix.chunk }}'
         path: upload
+    - name: Check outputs
+      if: inputs.check-outputs
+      uses: galaxyproject/planemo-ci-action@v1
+      id: check
+      with:
+        mode: check

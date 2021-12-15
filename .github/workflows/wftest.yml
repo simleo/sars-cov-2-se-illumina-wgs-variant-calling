@@ -60,3 +60,4 @@ jobs:
       galaxy-fork: galaxyproject
       galaxy-branch: master
       repository-list: '.'
+      check-outputs: true
