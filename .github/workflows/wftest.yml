@@ -51,7 +51,7 @@ jobs:
   test:
     name: Test workflow
     needs: setup
-    uses: simleo/sars-cov-2-se-illumina-wgs-variant-calling/.github/workflows/test_workflows.yml@main
+    uses: galaxyproject/iwc/.github/workflows/test_workflows.yml@reusable_test_wf
     with:
       # workflow level env vars cannot be used at the job level
       # https://github.community/t/how-to-set-and-access-a-workflow-variable/17335/15
