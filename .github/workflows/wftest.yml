@@ -1,60 +1,23 @@
+# workflow level env vars cannot be used at the job level
+# https://github.community/t/how-to-set-and-access-a-workflow-variable/17335/15
 name: Periodic workflow test
 on:
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:
-env:
-  GALAXY_FORK: galaxyproject
-  GALAXY_BRANCH: master
-  PYTHON_VERSION: '3.7'
 jobs:
   setup:
     name: Setup cache
-    runs-on: ubuntu-latest
-    outputs:
-      galaxy-head-sha: ${{ steps.get-galaxy-sha.outputs.galaxy-head-sha }}
-    steps:
-    - name: Determine latest commit in the Galaxy repo
-      id: get-galaxy-sha
-      run: echo "::set-output name=galaxy-head-sha::$(git ls-remote https://github.com/${{ env.GALAXY_FORK }}/galaxy refs/heads/${{ env.GALAXY_BRANCH }} | cut -f1)"
-    - uses: actions/setup-python@v1
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-    - name: Cache .cache/pip
-      uses: actions/cache@v2
-      id: cache-pip
-      with:
-        path: ~/.cache/pip
-        key: pip_cache_py_${{ env.PYTHON_VERSION }}_gxy_${{ steps.get-galaxy-sha.outputs.galaxy-head-sha }}
-    - name: Cache .planemo
-      uses: actions/cache@v2
-      id: cache-planemo
-      with:
-        path: ~/.planemo
-        key: planemo_cache_py_${{ env.PYTHON_VERSION }}_gxy_${{ steps.get-galaxy-sha.outputs.galaxy-head-sha }}
-    # Install the `wheel` package so that when installing other packages which
-    # are not available as wheels, pip will build a wheel for them, which can be cached.
-    - name: Install wheel
-      run: pip install wheel
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Planemo setup run to update the cache
-      uses: galaxyproject/planemo-ci-action@v1
-      with:
-        mode: setup
-        workflows: true
-        create-cache: ${{ steps.cache-pip.outputs.cache-hit != 'true' || steps.cache-planemo.outputs.cache-hit != 'true' }}
-        galaxy-fork: ${{ env.GALAXY_FORK }}
-        galaxy-branch: ${{ env.GALAXY_BRANCH }}
-        python-version: ${{ env.PYTHON_VERSION }}
+    uses: simleo/sars-cov-2-se-illumina-wgs-variant-calling/.github/workflows/setup.yml@main
+    with:
+      python-version-list: "[\"3.7\"]"
+      galaxy-fork: galaxyproject
+      galaxy-branch: master
   test:
     name: Test workflow
     needs: setup
-    uses: galaxyproject/iwc/.github/workflows/test_workflows.yml@reusable_test_wf
+    uses: simleo/sars-cov-2-se-illumina-wgs-variant-calling/.github/workflows/test_workflows.yml@main
     with:
-      # workflow level env vars cannot be used at the job level
-      # https://github.community/t/how-to-set-and-access-a-workflow-variable/17335/15
       galaxy-head-sha: ${{ needs.setup.outputs.galaxy-head-sha }}
       python-version-list: "[\"3.7\"]"
       galaxy-fork: galaxyproject
